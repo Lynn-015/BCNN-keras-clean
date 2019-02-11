@@ -6,7 +6,11 @@ from tensorflow.python.keras.optimizers import adam, RMSprop, SGD
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.keras.applications.vgg16 import VGG16
+from tensorflow.python.keras.applications.xception import Xception
+from tensorflow.python.keras.applications.densenet import DenseNet121
 from tensorflow.python.keras.initializers import *
+
+ 
 
 def _outer_product(x):
     '''Calculate outer-products of two tensors.
@@ -46,10 +50,10 @@ def _l2_normalize(x, axis=-1):
 def buil_bcnn(
         all_trainable=False,
 
-        size_height=448,
-        size_width=448,
-        no_class=200,
-        no_last_layer_backbone=17,
+        size_height=224,
+        size_width=224,
+        no_class=100,
+        no_last_layer_backbone=-9,
 
         name_optimizer='sgd',
         learning_rate=1.0,
@@ -87,7 +91,7 @@ def buil_bcnn(
 
     # Load model
     input_tensor = Input(shape=[size_height, size_width, 3])
-    pre_train_model = VGG16(
+    pre_train_model = DenseNet121(
         input_tensor=input_tensor,
         include_top=False,
         weights='imagenet')
@@ -169,10 +173,10 @@ def buil_bcnn(
 
 def save_model(
         all_trainable=False,
-        size_height=448,
-        size_width=448,
-        no_class=200,
-        no_last_layer_backbone=17,
+        size_height=224,
+        size_width=224,
+        no_class=100,
+        no_last_layer_backbone=-9,
         name_optimizer='sgd',
         learning_rate=1.0,
         decay_learning_rate=0.0,

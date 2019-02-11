@@ -6,21 +6,20 @@ from tensorflow.python.keras.callbacks import TensorBoard, ModelCheckpoint, Redu
 from tensorflow.python.keras.backend import clear_session
 
 from model_builder import buil_bcnn
-from data_loader import build_generator
+from data_loader import DataLoader
 
 clear_session()
 
 def train_model(
-        train_dir,
-        valid_dir,
+        data_dir,
         name_optimizer='sgd',
         learning_rate=1.0,
         decay_learning_rate=1e-8,
         all_trainable=False,
         model_weights_path=None,
-        no_class=200,
-        batch_size=128,
-        epoch=20,
+        no_class=100,
+        batch_size=32,
+        epoch=100,
 
         tensorboard_dir=None,
         checkpoint_dir=None
@@ -58,10 +57,14 @@ def train_model(
         model.load_weights(model_weights_path)
 
     # Load data
-    train_generator, valid_generator = build_generator(
-        train_dir=train_dir,
-        valid_dir=valid_dir,
-        batch_size=batch_size)
+    #train_generator, valid_generator = build_generator(
+        #train_dir=train_dir,
+        #valid_dir=valid_dir,
+        #batch_size=batch_size)
+
+    # to do: use generator to save memory
+    loader = DataLoader(npypath=data_dir)
+    trainx, trainy, validx, validy = loader.trainx, loader.trainy, loader.testx, loader.testy
 
     # Callbacks
     callbacks = []
@@ -96,16 +99,26 @@ def train_model(
     callbacks += [cb_reducer, cb_stopper]
 
     # Train
-    history = model.fit_generator(
-        train_generator,
+    #history = model.fit_generator(
+        #train_generator,
+        #epochs=epoch,
+        #validation_data=valid_generator,
+        #callbacks=callbacks)
+    
+    history = model.fit(
+        trainx, trainy,
         epochs=epoch,
-        validation_data=valid_generator,
-        callbacks=callbacks)
+        batch_size=batch_size, 
+        validation_data=(validx, validy),
+        verbose=1,
+        shuffle=True
+        )
 
     model.save_weights('./new_model_weights.h5')
 
     return history
 
 
+
 if __name__ == "__main__":
-    pass
+    train_model(data_dir='/mnt/lynn/data')
